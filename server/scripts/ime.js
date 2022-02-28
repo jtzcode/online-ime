@@ -45,13 +45,14 @@ function moveCandidateWindow() {
 
 function endComposition(index) {
     let isEnter = index === undefined ? true : false
-    inputArea.value += (!isEnter ? currentCandidates[index] : textInput.innerText);
+    inputArea.value += (!isEnter ? currentCandidates[index - 1] : textInput.innerText);
     currentCandidates = [];
     textInput.innerText = "";
     textBuffer = "";
     candidateWindow.innerText = "";
     candidateWindow.style.display = "none";
     imeContainer.style.display = 'none';
+    isIMEActive = false;
 }
 function startComposition(text) {
     imeContainer.style.display = 'block';
@@ -68,25 +69,39 @@ function startComposition(text) {
     });
 }
 
+function isLetter(c) {
+    return c.length === 1 && c.toLowerCase() != c.toUpperCase();
+}
+
 window.onload = () => {
     inputArea = document.getElementById('input-area');
     textInput.addEventListener('compositionstart', evt => {
         isIMEActive = true;
     });
+    const digitsReg = new RegExp('^[1-9]+$');
+    const printableReg = new RegExp(/^[a-z0-9!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]*$/i);
 
     inputArea.addEventListener('keydown', evt => {
         console.log("keydown: ", evt);
-        if (evt.key === 'Enter') {
-            endComposition();
+        if (isIMEActive) {
+            if (evt.key === 'Enter' && isIMEActive) {
+                endComposition();
+            }
+            else if (evt.code === 'Space' && isIMEActive) {
+                endComposition(1);
+            } else if (evt.key.match(digitsReg) && isIMEActive) {
+                endComposition(parseInt(evt.key));
+            }
+            evt.preventDefault();
+            evt.stopPropagation();
         }
-        else if (evt.code === 'Space' && isIMEActive) {
-            endComposition(0);
-        } else {
+        if (!evt.key.match(digitsReg) && isLetter(evt.key)) {
             textBuffer += evt.key;
             startComposition(textBuffer);
+            evt.preventDefault();
+            evt.stopPropagation();
         }
-        evt.stopPropagation();
-        evt.preventDefault();
+        
     });
     inputArea.addEventListener('beforeinput', evt => {
     });

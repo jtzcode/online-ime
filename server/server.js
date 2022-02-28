@@ -37,7 +37,7 @@ app.get('/', function(req, res) {
 
 app.get('/candidate', function (req, res) {
     let request = requestIMECandidate(req, res, (candidateData) => {
-        console.log(candidateData);
+        //console.log(candidateData);
         res.status(200).json(candidateData);
     });
     request.end();
