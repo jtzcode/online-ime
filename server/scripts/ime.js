@@ -6,9 +6,11 @@ let candidateWindow = null;
 let currentCandidates = [];
 let selectedIndex = null;
 let isIMEActive = false;
+let currentCursorPos = null;
 
 candidateWindow = document.getElementById("candidate");
 candidateWindow.style.display = "none";
+candidateWindow.style.position = 'absolute';
 
 
 imeContainer = document.createElement('div');
@@ -38,9 +40,14 @@ function setCandidates(data) {
     });
     candidateWindow.style.display = "block";
     candidateWindow.innerText = resultStr;
+    moveCandidateWindow();
 }
 
 function moveCandidateWindow() {
+    imeContainer.style.left = currentCursorPos.left + 'px';
+    imeContainer.style.top = currentCursorPos.top + parseInt(inputArea.style.fontSize.slice(0, -2)) + 'px';
+    candidateWindow.style.left = currentCursorPos.left + 'px';
+    candidateWindow.style.top = (currentCursorPos.top + imeContainer.getBoundingClientRect().height) + 'px';
 }
 
 function endComposition(index) {
@@ -53,6 +60,7 @@ function endComposition(index) {
     candidateWindow.style.display = "none";
     imeContainer.style.display = 'none';
     isIMEActive = false;
+    currentCursorPos = getCaretCoordinates(inputArea, inputArea.selectionEnd);
 }
 function startComposition(text) {
     imeContainer.style.display = 'block';
@@ -83,6 +91,8 @@ window.onload = () => {
 
     inputArea.addEventListener('keydown', evt => {
         console.log("keydown: ", evt);
+        currentCursorPos = getCaretCoordinates(inputArea, inputArea.selectionEnd);
+        console.log('Curret cursor at: ', currentCursorPos);
         if (isIMEActive) {
             if (evt.key === 'Enter' && isIMEActive) {
                 endComposition();
@@ -101,6 +111,9 @@ window.onload = () => {
             evt.preventDefault();
             evt.stopPropagation();
         }
+        
+    });
+    inputArea.addEventListener('keyup', evt => {
         
     });
     inputArea.addEventListener('beforeinput', evt => {
