@@ -7,28 +7,9 @@ let currentCandidates = [];
 let selectedIndex = null;
 let isIMEActive = false;
 let currentCursorPos = null;
-
-candidateWindow = document.getElementById("candidate");
-candidateWindow.style.display = "none";
-candidateWindow.style.position = 'absolute';
-
-
-imeContainer = document.createElement('div');
-imeContainer.style.position = 'absolute';
-imeContainer.style.display = 'none';
-imeContainer.setAttribute('id', 'ime-container');
-document.getElementById('app-container').appendChild(imeContainer);
-
-textInput = document.createElement('span');
-textInput.setAttribute('id', 'ime-buffer');
-textInput.setAttribute('contenteditable', true);
-textInput.setAttribute('spellcheck', false);
-textInput.setAttribute('class', 'ime-buffer');
-textInput.setAttribute('tabindex', '0');
-textInput.style.caretColor = 'transparent';
-textInput.style.fontSize = '10px';
-textInput.style.marginLeft = '0px';
-imeContainer.appendChild(textInput);
+let textFontSize = null;
+const bodyMargin = 8;
+const extraBorder = 8;
 
 function setCandidates(data) {
     imeContainer.style.zIndex = 14;
@@ -44,10 +25,15 @@ function setCandidates(data) {
 }
 
 function moveCandidateWindow() {
-    imeContainer.style.left = currentCursorPos.left + 'px';
-    imeContainer.style.top = currentCursorPos.top + parseInt(inputArea.style.fontSize.slice(0, -2)) + 'px';
-    candidateWindow.style.left = currentCursorPos.left + 'px';
-    candidateWindow.style.top = (currentCursorPos.top + imeContainer.getBoundingClientRect().height) + 'px';
+    const imeLeft = bodyMargin + currentCursorPos.left;
+    const imeTop = bodyMargin + currentCursorPos.top + textFontSize + extraBorder;
+    const candidateLeft = imeLeft;
+    const candidateTop = imeTop + textInput.getBoundingClientRect().height;
+
+    imeContainer.style.left = imeLeft + 'px';
+    imeContainer.style.top = imeTop + 'px';
+    candidateWindow.style.left = candidateLeft + 'px';
+    candidateWindow.style.top = candidateTop + 'px';
 }
 
 function endComposition(index) {
@@ -58,12 +44,12 @@ function endComposition(index) {
     textBuffer = "";
     candidateWindow.innerText = "";
     candidateWindow.style.display = "none";
-    imeContainer.style.display = 'none';
+    imeContainer.style.zIndex = '-1';
     isIMEActive = false;
     currentCursorPos = getCaretCoordinates(inputArea, inputArea.selectionEnd);
 }
 function startComposition(text) {
-    imeContainer.style.display = 'block';
+    imeContainer.style.zIndex = '14';
     textInput.innerText = text;
     const url = `/candidate?text=${text}`;
     isIMEActive = true;
@@ -83,11 +69,15 @@ function isLetter(c) {
 
 window.onload = () => {
     inputArea = document.getElementById('input-area');
+    candidateWindow = document.getElementById("candidate-contaier");
+    imeContainer = document.getElementById("ime-container");
+    textInput = document.getElementById("ime-buffer");
     textInput.addEventListener('compositionstart', evt => {
         isIMEActive = true;
     });
     const digitsReg = new RegExp('^[1-9]+$');
-    const printableReg = new RegExp(/^[a-z0-9!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]*$/i);
+    //const printableReg = new RegExp(/^[a-z0-9!"#$%&'()*+,.\/:;<=>?@\[\] ^_`{|}~-]*$/i);
+    textFontSize = parseFloat(getComputedStyle(inputArea, null).getPropertyValue('font-size'));
 
     inputArea.addEventListener('keydown', evt => {
         console.log("keydown: ", evt);
@@ -113,10 +103,9 @@ window.onload = () => {
         }
         
     });
-    inputArea.addEventListener('keyup', evt => {
-        
-    });
-    inputArea.addEventListener('beforeinput', evt => {
+    inputArea.addEventListener('compositionstart', evt => {
+        evt.preventDefault();
+        return false;
     });
 
     // textInput.addEventListener('focus', evt => {
