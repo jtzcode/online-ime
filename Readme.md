@@ -7,7 +7,9 @@
 ![demo](demo.png)
 ## Usage
 - Run the following command to start server:
+
     `npm install`
+    
     `node server/server.js`
 
 - Access the online IME via:
