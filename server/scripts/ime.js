@@ -10,6 +10,8 @@ let currentCursorPos = null;
 let textFontSize = null;
 const bodyMargin = 8;
 const extraBorder = 8;
+let lastKeydown = null;
+let isIMEEnable = true;
 
 function setCandidates(data) {
     imeContainer.style.zIndex = 14;
@@ -82,7 +84,10 @@ window.onload = () => {
     inputArea.addEventListener('keydown', evt => {
         console.log("keydown: ", evt);
         currentCursorPos = getCaretCoordinates(inputArea, inputArea.selectionEnd);
-        console.log('Curret cursor at: ', currentCursorPos);
+        if (evt.key === 'Shift' && (evt.altKey || evt.ctrlKey)) {
+            return true;
+        }
+        lastKeydown = evt.key;
         if (isIMEActive) {
             if (evt.key === 'Enter' && isIMEActive) {
                 endComposition();
@@ -95,13 +100,19 @@ window.onload = () => {
             evt.preventDefault();
             evt.stopPropagation();
         }
-        if (!evt.key.match(digitsReg) && isLetter(evt.key)) {
+        if (!evt.key.match(digitsReg) && isLetter(evt.key) && isIMEEnable) {
             textBuffer += evt.key;
             startComposition(textBuffer);
             evt.preventDefault();
             evt.stopPropagation();
         }
         
+    });
+    inputArea.addEventListener('keyup', evt => {
+        if (evt.key === 'Shift' && !evt.altKey && !evt.ctrlKey && lastKeydown === 'Shift') {
+            isIMEEnable = !isIMEEnable;
+            lastKeydown = null;
+        }
     });
     inputArea.addEventListener('compositionstart', evt => {
         evt.preventDefault();
