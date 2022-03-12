@@ -3,6 +3,8 @@ let inputArea;
 let textInput = null;
 let imeContainer = null;
 let candidateWindow = null;
+const candidateWindowSize = 10;
+let pageNum = 1;
 let currentCandidates = [];
 let selectedIndex = null;
 let isIMEActive = false;
@@ -65,6 +67,18 @@ function startComposition(text) {
     });
 }
 
+function getMoreCandidates() {
+    const url = `/more?text=${textInput.innerText}&num=${pageNum++}`;
+    fetch(url).then(res => {
+        if (res.status === 200) {
+            res.json().then(data => {
+                console.log("Update candidate data: ", data);
+                setCandidates(data);
+            });
+        }
+    });
+}
+
 function isLetter(c) {
     return c.length === 1 && c.toLowerCase() != c.toUpperCase();
 }
@@ -89,13 +103,15 @@ window.onload = () => {
         }
         lastKeydown = evt.key;
         if (isIMEActive) {
-            if (evt.key === 'Enter' && isIMEActive) {
+            if (evt.key === 'Enter') {
                 endComposition();
             }
-            else if (evt.code === 'Space' && isIMEActive) {
+            else if (evt.code === 'Space') {
                 endComposition(1);
-            } else if (evt.key.match(digitsReg) && isIMEActive) {
+            } else if (evt.key.match(digitsReg)) {
                 endComposition(parseInt(evt.key));
+            } else if (evt.code === 'ArrowDown') {
+                getMoreCandidates();
             }
             evt.preventDefault();
             evt.stopPropagation();
