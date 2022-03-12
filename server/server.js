@@ -3,18 +3,18 @@ const path = require('path');
 const https = require('https');
 
 const app = express();
+let optPath = '/request?itc=zh-t-i0-pinyin&text=[text]&num=[candidate_num]&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage';
 const options = {
     hostname: 'inputtools.google.com',
     port: 443,
-    path: '/request?itc=zh-t-i0-pinyin&num=[candidate_num]&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage',
     method: 'GET'
 };
 
 const requestIMECandidate = function(req, res, callback) {
     const text = req.query.text;
     const num = req.query.num;
-    options.path += `&text=${text}`;
-    options.path.replace('[candidate_num]', num);
+    options.path = optPath.replace('[text]', text).replace('[candidate_num]', num);
+    //console.log(options.path);
     return https.request(options, res => {
         let body = '';
         res.on('data', chunk => {
