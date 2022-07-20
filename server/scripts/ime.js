@@ -65,6 +65,18 @@ function startComposition(text) {
     });
 }
 
+function fetchMoreCandidates() {
+    const url = `/more`;
+    fetch(url).then(res => {
+        if (res.status === 200) {
+            res.json().then(data => {
+                console.log("More candidate data: ", data);
+                setCandidates(data);
+            });
+        }
+    });
+}
+
 function isLetter(c) {
     return c.length === 1 && c.toLowerCase() != c.toUpperCase();
 }
@@ -96,6 +108,8 @@ window.onload = () => {
                 endComposition(1);
             } else if (evt.key.match(digitsReg) && isIMEActive) {
                 endComposition(parseInt(evt.key));
+            } else if (evt.code === 'ArrowDown') {
+                fetchMoreCandidates();
             }
             evt.preventDefault();
             evt.stopPropagation();
