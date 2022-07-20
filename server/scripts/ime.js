@@ -3,7 +3,10 @@ let inputArea;
 let textInput = null;
 let imeContainer = null;
 let candidateWindow = null;
+const candidateWindowSize = 10;
+let pageNum = 1;
 let currentCandidates = [];
+let pageCandidates = [];
 let selectedIndex = null;
 let isIMEActive = false;
 let currentCursorPos = null;
@@ -17,8 +20,9 @@ function setCandidates(data) {
     imeContainer.style.zIndex = 14;
     let dataArray = JSON.parse(data);
     currentCandidates = dataArray[1][0][1] || [];
+    pageCandidates = currentCandidates.slice((pageNum - 1) * candidateWindowSize);
     let resultStr = "";
-    currentCandidates.forEach((candidate, index) => {
+    pageCandidates.forEach((candidate, index) => {
         resultStr += `${index + 1}. ${candidate} `;
     });
     candidateWindow.style.display = "block";
@@ -40,8 +44,9 @@ function moveCandidateWindow() {
 
 function endComposition(index) {
     let isEnter = index === undefined ? true : false
-    inputArea.value += (!isEnter ? currentCandidates[index - 1] : textInput.innerText);
+    inputArea.value += (!isEnter ? pageCandidates[index - 1] : textInput.innerText);
     currentCandidates = [];
+    pageCandidates = [];
     textInput.innerText = "";
     textBuffer = "";
     candidateWindow.innerText = "";
@@ -49,11 +54,12 @@ function endComposition(index) {
     imeContainer.style.zIndex = '-1';
     isIMEActive = false;
     currentCursorPos = getCaretCoordinates(inputArea, inputArea.selectionEnd);
+    pageNum = 1;
 }
 function startComposition(text) {
     imeContainer.style.zIndex = '14';
     textInput.innerText = text;
-    const url = `/candidate?text=${text}`;
+    const url = `/candidate?text=${text}&num=${pageNum * candidateWindowSize}`;
     isIMEActive = true;
     fetch(url).then(res => {
         if (res.status === 200) {
@@ -65,12 +71,22 @@ function startComposition(text) {
     });
 }
 
+<<<<<<< HEAD
 function fetchMoreCandidates() {
     const url = `/more`;
     fetch(url).then(res => {
         if (res.status === 200) {
             res.json().then(data => {
                 console.log("More candidate data: ", data);
+=======
+function getMoreCandidates() {
+    pageNum++;
+    const url = `/more?text=${textBuffer}&num=${pageNum * candidateWindowSize}`;
+    fetch(url).then(res => {
+        if (res.status === 200) {
+            res.json().then(data => {
+                console.log("Update candidate data: ", data);
+>>>>>>> fa63a54978fe2e729abce868b1335df60031fc58
                 setCandidates(data);
             });
         }
@@ -101,15 +117,19 @@ window.onload = () => {
         }
         lastKeydown = evt.key;
         if (isIMEActive) {
-            if (evt.key === 'Enter' && isIMEActive) {
+            if (evt.key === 'Enter') {
                 endComposition();
             }
-            else if (evt.code === 'Space' && isIMEActive) {
+            else if (evt.code === 'Space') {
                 endComposition(1);
-            } else if (evt.key.match(digitsReg) && isIMEActive) {
+            } else if (evt.key.match(digitsReg)) {
                 endComposition(parseInt(evt.key));
             } else if (evt.code === 'ArrowDown') {
+<<<<<<< HEAD
                 fetchMoreCandidates();
+=======
+                getMoreCandidates();
+>>>>>>> fa63a54978fe2e729abce868b1335df60031fc58
             }
             evt.preventDefault();
             evt.stopPropagation();
