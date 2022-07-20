@@ -71,14 +71,6 @@ function startComposition(text) {
     });
 }
 
-<<<<<<< HEAD
-function fetchMoreCandidates() {
-    const url = `/more`;
-    fetch(url).then(res => {
-        if (res.status === 200) {
-            res.json().then(data => {
-                console.log("More candidate data: ", data);
-=======
 function getMoreCandidates() {
     pageNum++;
     const url = `/more?text=${textBuffer}&num=${pageNum * candidateWindowSize}`;
@@ -86,7 +78,6 @@ function getMoreCandidates() {
         if (res.status === 200) {
             res.json().then(data => {
                 console.log("Update candidate data: ", data);
->>>>>>> fa63a54978fe2e729abce868b1335df60031fc58
                 setCandidates(data);
             });
         }
@@ -125,11 +116,7 @@ window.onload = () => {
             } else if (evt.key.match(digitsReg)) {
                 endComposition(parseInt(evt.key));
             } else if (evt.code === 'ArrowDown') {
-<<<<<<< HEAD
-                fetchMoreCandidates();
-=======
                 getMoreCandidates();
->>>>>>> fa63a54978fe2e729abce868b1335df60031fc58
             }
             evt.preventDefault();
             evt.stopPropagation();
