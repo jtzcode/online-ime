@@ -8,10 +8,6 @@ let optPath = '/request?itc=zh-t-i0-pinyin&text=[text]&num=[candidate_num]&cp=0&
 const options = {
     hostname: 'inputtools.google.com',
     port: 443,
-<<<<<<< HEAD
-    path: '/request?itc=zh-t-i0-pinyin&num=' + step + '&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage',
-=======
->>>>>>> fa63a54978fe2e729abce868b1335df60031fc58
     method: 'GET'
 };
 
